@@ -38,13 +38,8 @@
 <!-- Настройка ведущего -->
 <section id="vSetup" class="view wrap narrow" hidden>
   <span class="eyebrow">Перед началом</span>
-  <h2>Ведущий</h2>
-  <p>Ведущий — языковая модель Qwen, она работает через сервис OpenRouter. Ключ нужен только тому, кто создаёт стол. Напарнику ничего настраивать не надо.</p>
-  <ol class="steps">
-    <li>Зайди на <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>, войди и пополни баланс на $1–2.</li>
-    <li>Создай ключ и поставь ему лимит, например $1. Одна партия стоит 2–15 центов.</li>
-    <li>Вставь ключ сюда. Он хранится только в этом браузере и уходит только в OpenRouter.</li>
-  </ol>
+  <h2>Ключ для ведущего</h2>
+  <p>Ведущего играет Qwen через сервис OpenRouter. Вставь сюда свой ключ. Он хранится только в этом браузере. Напарнику ключ не нужен.</p>
   <label class="field"><span>Ключ OpenRouter</span><input type="password" id="inKey" autocomplete="off" placeholder="sk-or-v1-…"></label>
   <label class="field"><span>Модель ведущего</span>
     <select id="inModel">
@@ -54,10 +49,20 @@
     </select>
   </label>
   <div class="row">
-    <button class="btn primary" id="btnSetupGo">Проверить и продолжить</button>
+    <button class="btn primary big" id="btnSetupGo">Проверить ключ и продолжить</button>
     <button class="btn" id="btnSetupBack">Назад</button>
   </div>
   <p class="status" id="setupStatus" role="status"></p>
+  <details class="rules">
+    <summary>Где взять ключ</summary>
+    <ol class="steps">
+      <li>Открой <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a> и войди в аккаунт.</li>
+      <li>Нажми <b>Create Key</b>, в поле <b>Credit limit</b> поставь 1 (доллар).</li>
+      <li>Скопируй ключ, он начинается с <b>sk-or-v1-</b>. Потом его уже не покажут.</li>
+      <li>Вернись сюда и вставь в поле выше.</li>
+    </ol>
+    <p class="muted small">Одна партия стоит 1–15 центов. С лимитом в доллар больше точно не уйдёт.</p>
+  </details>
 </section>
 
 <!-- Лобби -->
