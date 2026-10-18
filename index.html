@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Аркхэм на двоих</title>
+<meta name="description" content="Кооперативный детектив в духе Лавкрафта для двоих с ИИ-ведущим. Дело «Тихая нота», около 15 минут.">
+<meta property="og:title" content="Аркхэм на двоих — Тихая нота">
+<meta property="og:description" content="Ночь, ливень, запертая комната и музыка за стеной. Детектив для двоих с ИИ-ведущим.">
+<meta property="og:image" content="img/cover.webp">
+<meta name="theme-color" content="#101b1a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23101b1a'/%3E%3Ctext x='32' y='45' font-size='38' text-anchor='middle' fill='%23c9a35a' font-family='Georgia'%3E%E2%99%AA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=PT+Mono&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="rain" aria-hidden="true"></canvas>
+
+<!-- Титул -->
+<section id="vTitle" class="view title" hidden>
+  <div class="cover"><img src="img/cover.webp" alt="Двое идут по ночной улице Аркхэма к башне консерватории"></div>
+  <div class="title-body wrap">
+    <span class="eyebrow">Аркхэм, Массачусетс · ночь на 22 сентября 1926</span>
+    <h1>Аркхэм на двоих</h1>
+    <p class="lede">Дело № 1: <b>«Тихая нота»</b>. Студентка-пианистка исчезла из комнаты, запертой изнутри. Из-за стены слышна музыка. До двух часов ночи вам нужно понять, кто её туда отправил и как её вернуть.</p>
+    <div class="facts mono"><span>2 игрока</span><span>~15 минут</span><span>ИИ-ведущий</span></div>
+    <div class="row">
+      <button class="btn primary big" id="btnOnline">Создать стол на двоих</button>
+      <button class="btn big" id="btnLocal">Играть на одном экране</button>
+    </div>
+    <p class="muted small">«Стол на двоих» — каждый играет со своего телефона: ты создаёшь стол и отправляешь ссылку. Регистрация напарнику не нужна.</p>
+    <details class="rules" open><summary>Как играть</summary><div class="rules-body" data-rules></div></details>
+  </div>
+</section>
+
+<!-- Настройка ведущего -->
+<section id="vSetup" class="view wrap narrow" hidden>
+  <span class="eyebrow">Перед началом</span>
+  <h2>Ведущий</h2>
+  <p>Ведущий — языковая модель Qwen, она работает через сервис OpenRouter. Ключ нужен только тому, кто создаёт стол. Напарнику ничего настраивать не надо.</p>
+  <ol class="steps">
+    <li>Зайди на <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>, войди и пополни баланс на $1–2.</li>
+    <li>Создай ключ и поставь ему лимит, например $1. Одна партия стоит 2–15 центов.</li>
+    <li>Вставь ключ сюда. Он хранится только в этом браузере и уходит только в OpenRouter.</li>
+  </ol>
+  <label class="field"><span>Ключ OpenRouter</span><input type="password" id="inKey" autocomplete="off" placeholder="sk-or-v1-…"></label>
+  <label class="field"><span>Модель ведущего</span>
+    <select id="inModel">
+      <option value="qwen/qwen3.7-plus">Qwen 3.7 Plus — рекомендую, ~3 ¢ за партию</option>
+      <option value="qwen/qwen3.7-max">Qwen 3.7 Max — пишет лучше и быстрее, ~15 ¢</option>
+      <option value="qwen/qwen3.8-flash">Qwen 3.8 Flash — дешевле всего, ~1 ¢</option>
+    </select>
+  </label>
+  <div class="row">
+    <button class="btn primary" id="btnSetupGo">Проверить и продолжить</button>
+    <button class="btn" id="btnSetupBack">Назад</button>
+  </div>
+  <p class="status" id="setupStatus" role="status"></p>
+</section>
+
+<!-- Лобби -->
+<section id="vLobby" class="view wrap" hidden>
+  <div class="lobby-head">
+    <span class="eyebrow">Сбор у стола</span>
+    <h2>Кто берётся за дело?</h2>
+    <p class="muted">Займите места, назовите героев и нажмите «Готов». После этого каждый увидит тайну своего героя: её знает только он сам.</p>
+  </div>
+  <div class="invite" id="invite" hidden>
+    <div><b>Ссылка для напарника</b><div class="muted small">Отправь её в мессенджер. Пусть откроет на своём телефоне.</div></div>
+    <input type="text" id="inviteUrl" readonly>
+    <div class="row"><button class="btn small primary" id="btnCopy">Скопировать</button><button class="btn small" id="btnShare" hidden>Отправить…</button></div>
+  </div>
+  <div class="seats" id="seats"></div>
+  <div class="row" id="lobbyFoot"></div>
+</section>
+
+<!-- Игра -->
+<section id="vGame" class="view" hidden>
+  <header class="hud">
+    <div class="wrap hud-row">
+      <div class="hud-case"><span class="eyebrow">Дело № 1</span><b>Тихая нота</b></div>
+      <div class="hud-clock" title="Время ночи"><span class="mono" id="hClock">22:00</span><span class="eyebrow" id="hTravels">поездок: 3</span></div>
+      <div class="hud-calm" title="Самообладание — общее на двоих"><span class="eyebrow">Самообладание</span><div class="candles" id="hCalm"></div></div>
+      <div class="hud-btns">
+        <button class="icon-btn" id="btnSound" aria-pressed="false" title="Звук дождя">♪</button>
+        <button class="icon-btn" id="btnRules" title="Правила">?</button>
+        <button class="btn small stop" id="btnX" title="Сцена неприятна — ведущий сразу её сменит">Стоп</button>
+      </div>
+    </div>
+  </header>
+  <div class="banner" id="banner"><img id="bannerImg" src="img/m1.webp" alt=""><div class="banner-cap wrap"><span id="bannerTitle">Репетиционная 3-Б · 22:00</span></div></div>
+  <nav class="tabs wrap" id="tabs" role="tablist">
+    <button role="tab" data-tab="chron" aria-selected="true">Хроника</button>
+    <button role="tab" data-tab="map" aria-selected="false">Карта</button>
+    <button role="tab" data-tab="clues" aria-selected="false">Улики <span class="pill" id="clueCount">0</span></button>
+    <button role="tab" data-tab="us" aria-selected="false">Мы</button>
+  </nav>
+  <div class="wrap game" id="game" data-tab="chron">
+    <main class="chron">
+      <div class="log" id="log" aria-live="polite"></div>
+      <div class="sheet draft" id="draft" hidden></div>
+      <div class="dock" id="dock"></div>
+    </main>
+    <aside class="side">
+      <section class="panel" id="pMap"></section>
+      <section class="panel" id="pClues"></section>
+      <section class="panel" id="pUs"></section>
+    </aside>
+  </div>
+</section>
+
+<section id="vError" class="view wrap narrow" hidden>
+  <h2>Не получилось подключиться к столу</h2>
+  <p id="errText"></p>
+  <div class="row"><button class="btn primary" id="btnErrRetry">Попробовать снова</button><a class="btn" href="./">На главную</a></div>
+</section>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-box">
+    <h2 id="modalTitle">Как играть</h2>
+    <div class="rules-body" data-rules></div>
+    <div class="row"><button class="btn primary" id="btnModalClose">Понятно</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
